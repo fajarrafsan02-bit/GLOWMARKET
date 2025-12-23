@@ -1,0 +1,1610 @@
+openapi: 3.0.3
+info:
+  title: Fajar Gold Jewelry API
+  description: |
+    RESTful API documentation for Fajar Gold Jewelry e-commerce platform.
+    This API provides endpoints for authentication, product management, cart operations, 
+    order management, payment processing, and admin functionalities.
+    
+    ## Authentication
+    - User authentication uses JWT tokens via OTP verification
+    - Admin authentication requires email/password + OTP
+    - Include token in Authorization header: `Bearer {token}`
+    
+    ## Base URL
+    Development: `http://localhost:8080`
+  version: 1.0.0
+  contact:
+    name: Fajar Gold Jewelry
+    email: admin@fajargold.com
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.fajargold.com
+    description: Production server (if applicable)
+
+tags:
+  - name: Authentication
+    description: User and admin authentication endpoints
+  - name: Products
+    description: Product catalog management
+  - name: Cart
+    description: Shopping cart operations
+  - name: Wishlist
+    description: Wishlist management
+  - name: Orders
+    description: Order management
+  - name: Payments
+    description: Payment processing via Xendit
+  - name: Addresses
+    description: User address management
+  - name: Users
+    description: User management
+  - name: Statistics
+    description: Admin statistics and reports
+  - name: Notifications
+    description: Admin notifications (WebSocket)
+  - name: Chat
+    description: Real-time chat between admin and customers (WebSocket)
+  - name: WebSocket
+    description: WebSocket endpoints for real-time features (Presence, Chat, Notifications)
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained after OTP verification
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error message
+        validationErrors:
+          type: object
+          additionalProperties:
+            type: string
+
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        data:
+          type: object
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: "Cincin Emas 24K"
+        gambar:
+          type: string
+          format: uri
+          example: "https://example.com/image.jpg"
+        harga:
+          type: number
+          format: double
+          example: 15000000
+        stock:
+          type: integer
+          example: 50
+        karatEmas:
+          type: integer
+          example: 24
+        status:
+          type: string
+          enum: [TERSEDIA, TIDAK_TERSEDIA, HABIS]
+          example: TERSEDIA
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        produk:
+          $ref: '#/components/schemas/Product'
+        jumlah:
+          type: integer
+          example: 2
+        quantity:
+          type: integer
+          example: 2
+
+    WishlistItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        produkId:
+          type: integer
+          example: 5
+        produk:
+          $ref: '#/components/schemas/Product'
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nomorPesanan:
+          type: string
+          example: "ORD-2024-001"
+        userName:
+          type: string
+          example: "John Doe"
+        customerName:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "john@example.com"
+        totalHarga:
+          type: number
+          format: double
+          example: 30000000
+        total:
+          type: number
+          format: double
+          example: 30000000
+        status:
+          type: string
+          enum: [PENDING, DIKEMAS, DIKIRIM, SELESAI, DIBATALKAN]
+          example: PENDING
+        nomorResi:
+          type: string
+          nullable: true
+          example: "JNT1234567890"
+        createdAt:
+          type: string
+          format: date-time
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        externalId:
+          type: string
+          example: "PAY-20241221-001"
+        invoiceUrl:
+          type: string
+          format: uri
+          example: "https://checkout.xendit.co/web/123456"
+        amount:
+          type: number
+          format: double
+          example: 30000000
+        status:
+          type: string
+          enum: [PENDING, PAID, SETTLED, EXPIRED]
+          example: PENDING
+        createdAt:
+          type: string
+          format: date-time
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        namaLengkap:
+          type: string
+          example: "John Doe"
+        nomorTelepon:
+          type: string
+          example: "081234567890"
+        alamatLengkap:
+          type: string
+          example: "Jl. Sudirman No. 123, Jakarta"
+        provinsi:
+          type: string
+          example: "DKI Jakarta"
+        kota:
+          type: string
+          example: "Jakarta Selatan"
+        kecamatan:
+          type: string
+          example: "Kebayoran Baru"
+        kelurahan:
+          type: string
+          example: "Senayan"
+        kodePos:
+          type: string
+          example: "12190"
+        catatan:
+          type: string
+          nullable: true
+          example: "Dekat MRT"
+        isDefault:
+          type: boolean
+          example: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: "John Doe"
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        phone:
+          type: string
+          example: "081234567890"
+        nomorTelepon:
+          type: string
+          example: "081234567890"
+        isActive:
+          type: boolean
+          example: true
+        totalOrders:
+          type: integer
+          example: 5
+        orderCount:
+          type: integer
+          example: 5
+        totalSpent:
+          type: number
+          example: 50000000
+        createdAt:
+          type: string
+          format: date-time
+        lastLogin:
+          type: string
+          format: date-time
+
+    Statistics:
+      type: object
+      properties:
+        totalPenjualan:
+          type: number
+          example: 150000000
+        totalPesanan:
+          type: integer
+          example: 45
+        totalProdukTerjual:
+          type: integer
+          example: 120
+
+paths:
+  # ============================================
+  # AUTHENTICATION
+  # ============================================
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login (sends OTP to email)
+      description: Initiates user login process by sending OTP to user's email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "OTP sent to email"
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login-admin:
+    post:
+      tags:
+        - Authentication
+      summary: Admin login (sends OTP to email)
+      description: Initiates admin login process by sending OTP to admin's email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "admin@fajargold.com"
+                password:
+                  type: string
+                  format: password
+                  example: "admin123"
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "OTP sent to email"
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/verifikasi-otp-admin:
+    post:
+      tags:
+        - Authentication
+      summary: Verify admin OTP
+      description: Verifies OTP code and returns JWT token for admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - kode
+              properties:
+                kode:
+                  type: string
+                  example: "1234"
+                  description: 4-digit OTP code
+      responses:
+        '200':
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  namaLengkap:
+                    type: string
+                    example: "Admin Fajar"
+                  email:
+                    type: string
+                    example: "admin@fajargold.com"
+        '400':
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================
+  # PRODUCTS
+  # ============================================
+  /api/produk:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      description: Retrieves list of all products in catalog
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+    post:
+      tags:
+        - Products
+      summary: Create new product (Admin only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - harga
+                - stock
+                - karatEmas
+              properties:
+                nama:
+                  type: string
+                  example: "Gelang Emas 22K"
+                gambar:
+                  type: string
+                  format: uri
+                  nullable: true
+                harga:
+                  type: number
+                  example: 12000000
+                stock:
+                  type: integer
+                  example: 30
+                karatEmas:
+                  type: integer
+                  example: 22
+                status:
+                  type: string
+                  enum: [TERSEDIA, TIDAK_TERSEDIA, HABIS]
+                  example: TERSEDIA
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Unauthorized
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/produk/search:
+    get:
+      tags:
+        - Products
+      summary: Search products by name
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: nama
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Product name to search
+          example: "cincin"
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+  /api/produk/upload-image:
+    post:
+      tags:
+        - Products
+      summary: Upload product image (Admin only)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Image uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imageUrl:
+                    type: string
+                    format: uri
+                    example: "https://example.com/uploads/image.jpg"
+        '401':
+          description: Unauthorized
+
+  /api/produk/{id}:
+    put:
+      tags:
+        - Products
+      summary: Update product (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Product ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                gambar:
+                  type: string
+                  format: uri
+                harga:
+                  type: number
+                stock:
+                  type: integer
+                karatEmas:
+                  type: integer
+                status:
+                  type: string
+                  enum: [TERSEDIA, TIDAK_TERSEDIA, HABIS]
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Product not found
+
+    delete:
+      tags:
+        - Products
+      summary: Delete product (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Product ID
+      responses:
+        '200':
+          description: Product deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Product not found
+
+  # ============================================
+  # CART
+  # ============================================
+  /api/keranjang:
+    get:
+      tags:
+        - Cart
+      summary: Get user's cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CartItem'
+        '401':
+          description: Unauthorized
+
+    post:
+      tags:
+        - Cart
+      summary: Add item to cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - produkId
+                - quantity
+              properties:
+                produkId:
+                  type: integer
+                  example: 5
+                quantity:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Item added to cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Unauthorized
+
+  /api/keranjang/{id}:
+    patch:
+      tags:
+        - Cart
+      summary: Update cart item quantity
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Cart item ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: integer
+                  example: 3
+      responses:
+        '200':
+          description: Cart item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Unauthorized
+
+    delete:
+      tags:
+        - Cart
+      summary: Remove item from cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Cart item ID
+      responses:
+        '200':
+          description: Item removed from cart
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # WISHLIST
+  # ============================================
+  /api/wishlist:
+    get:
+      tags:
+        - Wishlist
+      summary: Get user's wishlist
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Wishlist items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishlistItem'
+        '401':
+          description: Unauthorized
+
+    post:
+      tags:
+        - Wishlist
+      summary: Add item to wishlist
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - produkId
+              properties:
+                produkId:
+                  type: integer
+                  example: 5
+      responses:
+        '201':
+          description: Item added to wishlist
+        '401':
+          description: Unauthorized
+
+  /api/wishlist/{id}:
+    delete:
+      tags:
+        - Wishlist
+      summary: Remove item from wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Wishlist item ID
+      responses:
+        '200':
+          description: Item removed from wishlist
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # ORDERS
+  # ============================================
+  /api/pesanan:
+    get:
+      tags:
+        - Orders
+      summary: Get all orders (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+        '401':
+          description: Unauthorized
+
+  /api/pesanan/{id}/status:
+    put:
+      tags:
+        - Orders
+      summary: Update order status (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Order ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [PENDING, DIKEMAS, DIKIRIM, SELESAI, DIBATALKAN]
+                  example: DIKIRIM
+                nomorResi:
+                  type: string
+                  nullable: true
+                  example: "JNT1234567890"
+      responses:
+        '200':
+          description: Order status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Order not found
+
+  # ============================================
+  # PAYMENTS
+  # ============================================
+  /api/payments/create-invoice:
+    post:
+      tags:
+        - Payments
+      summary: Create Xendit invoice
+      description: Creates a Xendit payment invoice for checkout
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - customerName
+                - customerEmail
+                - alamatId
+              properties:
+                amount:
+                  type: number
+                  example: 30000000
+                customerName:
+                  type: string
+                  example: "John Doe"
+                customerEmail:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                customerPhone:
+                  type: string
+                  example: "081234567890"
+                description:
+                  type: string
+                  example: "Pembelian 2 produk emas"
+                alamatId:
+                  type: integer
+                  example: 1
+                catatan:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Invoice created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Payment'
+        '401':
+          description: Unauthorized
+        '400':
+          description: Invalid request
+
+  /api/payments/{externalId}:
+    get:
+      tags:
+        - Payments
+      summary: Get payment by external ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: externalId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Payment external ID
+      responses:
+        '200':
+          description: Payment retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Payment'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Payment not found
+
+  /api/payments/sync/{externalId}:
+    post:
+      tags:
+        - Payments
+      summary: Sync payment status with Xendit
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: externalId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Payment external ID
+      responses:
+        '200':
+          description: Payment synced successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Payment'
+        '401':
+          description: Unauthorized
+
+  /api/payments/sync-by-xendit/{xenditId}:
+    get:
+      tags:
+        - Payments
+      summary: Sync payment by Xendit invoice ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: xenditId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Xendit invoice ID
+      responses:
+        '200':
+          description: Payment synced successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Payment'
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # ADDRESSES
+  # ============================================
+  /api/alamat:
+    get:
+      tags:
+        - Addresses
+      summary: Get user addresses
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Addresses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # USERS
+  # ============================================
+  /api/user/all:
+    get:
+      tags:
+        - Users
+      summary: Get all users (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
+  /api/user/total-pelanggan:
+    get:
+      tags:
+        - Users
+      summary: Get total customer count (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Total customers retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 150
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # STATISTICS
+  # ============================================
+  /api/statistik/penjualan/bulan-ini:
+    get:
+      tags:
+        - Statistics
+      summary: Get current month sales (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Sales data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalPenjualan:
+                    type: number
+                    example: 150000000
+        '401':
+          description: Unauthorized
+
+  /api/statistik/pesanan/bulan-ini:
+    get:
+      tags:
+        - Statistics
+      summary: Get current month orders count (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Orders count retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalPesanan:
+                    type: integer
+                    example: 45
+        '401':
+          description: Unauthorized
+
+  /api/statistik/produk-terjual/bulan-ini:
+    get:
+      tags:
+        - Statistics
+      summary: Get current month products sold (Admin only)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Products sold count retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalProdukTerjual:
+                    type: integer
+                    example: 120
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # CHAT
+  # ============================================
+  /api/chat/conversations:
+    get:
+      tags:
+        - Chat
+      summary: Get all chat conversations (Admin only)
+      description: Retrieves list of all chat conversations with customers
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Conversations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId:
+                          type: integer
+                          example: 5
+                        userName:
+                          type: string
+                          example: "John Doe"
+                        userEmail:
+                          type: string
+                          example: "john@example.com"
+                        lastMessage:
+                          type: string
+                          example: "Hello, I need help"
+                        lastMessageTime:
+                          type: string
+                          format: date-time
+                        unreadCount:
+                          type: integer
+                          example: 3
+                        isOnline:
+                          type: boolean
+                          example: true
+        '401':
+          description: Unauthorized
+
+  /api/chat/history:
+    get:
+      tags:
+        - Chat
+      summary: Get chat history with a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: User ID to get chat history
+          example: 5
+      responses:
+        '200':
+          description: Chat history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        senderId:
+                          type: integer
+                        receiverId:
+                          type: integer
+                        senderRole:
+                          type: string
+                          enum: [USER, ADMIN]
+                          example: USER
+                        message:
+                          type: string
+                          example: "Hello"
+                        createdAt:
+                          type: string
+                          format: date-time
+                        isRead:
+                          type: boolean
+        '401':
+          description: Unauthorized
+
+  /api/chat/mark-read:
+    post:
+      tags:
+        - Chat
+      summary: Mark messages as read
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: senderId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Sender user ID
+      responses:
+        '200':
+          description: Messages marked as read
+        '401':
+          description: Unauthorized
+
+  /api/statistik/laporan-harian:
+    get:
+      tags:
+        - Statistics
+      summary: Get daily report (Admin only)
+      description: Retrieves daily sales report for a date range
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+          example: "2025-12-15"
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+          example: "2025-12-21"
+      responses:
+        '200':
+          description: Daily report retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Laporan harian berhasil diambil"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tanggal:
+                          type: string
+                          format: date
+                          example: "2025-12-21"
+                        pesanan:
+                          type: integer
+                          example: 15
+                        penjualan:
+                          type: number
+                          format: double
+                          example: 25000000
+                        produkTerjual:
+                          type: integer
+                          example: 45
+                  periode:
+                    type: object
+                    properties:
+                      startDate:
+                        type: string
+                        example: "2025-12-15"
+                      endDate:
+                        type: string
+                        example: "2025-12-21"
+        '400':
+          description: Invalid date format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Format tanggal tidak valid. Gunakan format YYYY-MM-DD"
+        '401':
+          description: Unauthorized
+
+  # ============================================
+  # WEBSOCKET PRESENCE
+  # ============================================
+  /ws:
+    get:
+      tags:
+        - WebSocket
+      summary: WebSocket connection endpoint
+      description: |
+        Establishes WebSocket connection using SockJS.
+        
+        **Connection URL**: `http://localhost:8080/ws`
+        
+        **Authentication**: Include JWT token in connect headers:
+        ```javascript
+        connectHeaders: {
+          Authorization: 'Bearer {token}'
+        }
+        ```
+        
+        **Supported Topics**:
+        - `/topic/user.presence` - User online/offline status updates
+        - `/topic/chat/admin/{adminId}` - Chat messages for admin
+        - `/topic/admin/notifications` - Admin notifications
+        
+        **Destinations to publish**:
+        - `/app/user.presence` - Send user presence status
+        - `/app/user.heartbeat` - Send heartbeat to keep connection alive
+        - `/app/chat.send` - Send chat message
+      responses:
+        '101':
+          description: Switching Protocols - WebSocket connection established
+
+  /app/user.presence:
+    post:
+      tags:
+        - WebSocket
+      summary: Send user presence status (WebSocket)
+      description: |
+        Publishes user online/offline status via WebSocket.
+        
+        **Destination**: `/app/user.presence`
+        
+        **Broadcasts to**: `/topic/user.presence`
+        
+        **Automatically sent by frontend**:
+        - On login: status = "ONLINE"
+        - On logout/disconnect: status = "OFFLINE"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - email
+                - status
+              properties:
+                userId:
+                  type: integer
+                  example: 5
+                email:
+                  type: string
+                  example: "john@example.com"
+                status:
+                  type: string
+                  enum: [ONLINE, OFFLINE]
+                  example: "ONLINE"
+      responses:
+        '200':
+          description: Presence broadcast to all subscribers
+
+  /app/user.heartbeat:
+    post:
+      tags:
+        - WebSocket
+      summary: Send heartbeat to keep presence alive (WebSocket)
+      description: |
+        Sends periodic heartbeat (every 30 seconds) to maintain user online status.
+        
+        **Destination**: `/app/user.heartbeat`
+        
+        **Automatically sent by `useWebSocketPresence` hook**
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - timestamp
+              properties:
+                userId:
+                  type: integer
+                  example: 5
+                timestamp:
+                  type: string
+                  format: date-time
+                  example: "2025-12-22T10:30:00Z"
+      responses:
+        '200':
+          description: Heartbeat received
+
+  /topic/user.presence:
+    get:
+      tags:
+        - WebSocket
+      summary: Subscribe to user presence updates (WebSocket)
+      description: |
+        Subscribe to receive real-time user online/offline status updates.
+        
+        **Topic**: `/topic/user.presence`
+        
+        **Subscribers**: Admin users (for AdminChat)
+        
+        **Message format**:
+        ```javascript
+        {
+          userId: 5,
+          email: "john@example.com",
+          status: "ONLINE" // or "OFFLINE"
+        }
+        ```
+      responses:
+        '200':
+          description: Subscribed to presence updates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    example: 5
+                  email:
+                    type: string
+                    example: "john@example.com"
+                  status:
+                    type: string
+                    enum: [ONLINE, OFFLINE]
+                    example: "ONLINE"
+
+  /api/statistik/grafik/bulanan:
+    get:
+      tags:
+        - Statistics
+      summary: Get monthly chart data (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tahun
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Year for chart data
+          example: 2024
+      responses:
+        '200':
+          description: Chart data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  labels:
+                    type: array
+                    items:
+                      type: string
+                    example: ["Jan", "Feb", "Mar"]
+                  data:
+                    type: array
+                    items:
+                      type: number
+                    example: [10000000, 15000000, 12000000]
+        '401':
+          description: Unauthorized
+
+  /api/statistik/grafik/tahunan/export-excel:
+    get:
+      tags:
+        - Statistics
+      summary: Export yearly statistics to Excel (Admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tahun
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: Year to export
+          example: 2024
+      responses:
+        '200':
+          description: Excel file generated
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
