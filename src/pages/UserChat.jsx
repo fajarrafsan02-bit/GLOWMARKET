@@ -244,7 +244,7 @@ export default function UserChat() {
                 stompClientRef.current = null;
             }
         };
-    }, [userProfile?.id, adminId]);
+    }, [userProfile, adminId]);
 
     // Send Message
     const sendMessage = async () => {

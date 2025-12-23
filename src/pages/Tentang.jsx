@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Link } from "react-router-dom";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -53,7 +54,7 @@ export default function Tentang() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="min-h-screen bg-gradient-to-b from-amber-50/50 to-white dark:from-black dark:to-gray-950 overflow-x-hidden transition-all duration-700"
+            className="min-h-screen bg-linear-to-b from-amber-50/50 to-white dark:from-black dark:to-gray-950 overflow-x-hidden transition-all duration-700"
         >
             <Header setShowAuth={setShowAuth} />
 
@@ -62,7 +63,7 @@ export default function Tentang() {
                 initial={{ y: -80, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 1, type: "spring" }}
-                className="relative bg-gradient-to-r from-amber-600 to-yellow-700 dark:from-amber-700 dark:to-yellow-800 text-white py-24 overflow-hidden shadow-2xl"
+                className="relative bg-linear-to-r from-amber-600 to-yellow-700 dark:from-amber-700 dark:to-yellow-800 text-white py-24 overflow-hidden shadow-2xl"
             >
                 <div className="absolute inset-0 opacity-40 dark:opacity-60">
                     <img
@@ -196,7 +197,7 @@ export default function Tentang() {
                                     whileHover={{ y: -12, scale: 1.05 }}
                                     className="bg-white dark:bg-gray-900/95 rounded-3xl shadow-2xl p-10 text-center border border-amber-100 dark:border-yellow-800/40 backdrop-blur-sm transition-all duration-500"
                                 >
-                                    <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-yellow-500 dark:from-amber-500 dark:to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                                    <div className="w-20 h-20 bg-linear-to-br from-amber-400 to-yellow-500 dark:from-amber-500 dark:to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
                                         <Icon className="w-10 h-10 text-white" />
                                     </div>
                                     <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
@@ -253,7 +254,7 @@ export default function Tentang() {
                                     alt={`Koleksi emas Fajar Gold ${i + 1}`}
                                     className="w-full h-72 object-cover transition-transform duration-1000 group-hover:scale-120"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-end p-6">
+                                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-end p-6">
                                     <p className="text-white font-bold text-lg drop-shadow-lg">
                                         ✨ Emas 24K Premium
                                     </p>
@@ -269,7 +270,7 @@ export default function Tentang() {
                     whileInView={{ y: 0, opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.9 }}
-                    className="bg-gradient-to-r from-amber-100/80 to-yellow-100/80 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-3xl p-12 text-center shadow-2xl border border-amber-200 dark:border-yellow-700/50 backdrop-blur-sm"
+                    className="bg-linear-to-r from-amber-100/80 to-yellow-100/80 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-3xl p-12 text-center shadow-2xl border border-amber-200 dark:border-yellow-700/50 backdrop-blur-sm"
                 >
                     <motion.div
                         animate={{ y: [0, -10, 0] }}
@@ -290,7 +291,7 @@ export default function Tentang() {
                     <motion.div whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.95 }}>
                         <Link
                             to="/kontak"
-                            className="inline-block px-10 py-5 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 dark:from-amber-500 dark:to-yellow-500 text-white font-bold text-xl shadow-2xl hover:shadow-yellow-500/50 transition-all duration-500"
+                            className="inline-block px-10 py-5 rounded-xl bg-linear-to-r from-amber-600 to-yellow-600 dark:from-amber-500 dark:to-yellow-500 text-white font-bold text-xl shadow-2xl hover:shadow-yellow-500/50 transition-all duration-500"
                         >
                             Hubungi Kami Sekarang
                         </Link>

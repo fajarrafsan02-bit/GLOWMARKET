@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -60,7 +61,7 @@ export default function Pesanan() {
       const arr = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
       setOrders(arr);
     } catch (err) {
-      setOrdersError("Gagal memuat pesanan");
+      setOrdersError("Gagal memuat pesanan",err);
     } finally {
       setOrdersLoading(false);
     }
@@ -212,7 +213,7 @@ export default function Pesanan() {
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Hero Section - Lebih Compact */}
-        <div className="bg-gradient-to-r from-amber-600 to-amber-500 dark:from-amber-700 dark:to-amber-600 text-white py-8">
+        <div className="bg-linear-to-r from-amber-600 to-amber-500 dark:from-amber-700 dark:to-amber-600 text-white py-8">
           <div className="max-w-7xl mx-auto px-4 text-center">
             <h1 className="text-2xl md:text-3xl font-bold mb-2">
               Pesanan Saya
@@ -389,7 +390,7 @@ export default function Pesanan() {
                       className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full"
                     >
                       {/* Header */}
-                      <div className="bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 p-3 text-white">
+                      <div className="bg-linear-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700 p-3 text-white">
                         <div className="flex justify-between items-center">
                           <h4 className="font-bold text-base">#{order.id || order.orderId}</h4>
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 ${status.color}`}>
@@ -407,7 +408,7 @@ export default function Pesanan() {
                         <div className="space-y-2 mb-3">
                           {(order.items || []).slice(0, 3).map((item, i) => (
                             <div key={i} className="flex items-center gap-2">
-                              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden shrink-0">
                                 {item.gambarProduk ? (
                                   <img src={item.gambarProduk} alt={item.namaProduk} className="w-full h-full object-cover" />
                                 ) : (
@@ -449,7 +450,7 @@ export default function Pesanan() {
                       <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
                         <Link
                           to={`/pesanan/${order.id || order.orderId}`}
-                          className="w-full block text-center py-2 rounded-lg bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white font-medium text-xs transition flex items-center justify-center gap-1.5"
+                          className="w-full text-center py-2 rounded-lg bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white font-medium text-xs transition flex items-center justify-center gap-1.5"
                         >
                           Lihat Detail <ChevronRight className="w-3.5 h-3.5" />
                         </Link>
@@ -474,7 +475,7 @@ No. Pesanan: #${order.id || order.orderId}
 Produk: ${(order.items || []).map(i => i.namaProduk).join(", ")}
 Total: ${formatPrice(getOrderTotal(order))}`
                           }}
-                          className="w-full block text-center mt-2 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-xs transition flex items-center justify-center gap-1.5"
+                          className="w-full text-center mt-2 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium text-xs transition flex items-center justify-center gap-1.5"
                         >
                           <MessageCircle className="w-3.5 h-3.5" /> Hubungi Penjual
                         </Link>

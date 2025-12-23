@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useMemo, useState } from "react";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -35,9 +36,18 @@ export default function Katalog() {
         const arr = Array.isArray(res.data?.data) ? res.data.data : [];
         setItems(arr);
 
-        // Fetch reviews for all products
-        arr.forEach(product => {
-          fetchProductReviews(product.id);
+        // Fetch reviews for all products inline to avoid dependency issues
+        arr.forEach(async (product) => {
+          try {
+            const reviewRes = await api.get(`/api/reviews/produk/${product.id}`);
+            const reviews = reviewRes.data?.data || [];
+            setProductReviews(prev => ({
+              ...prev,
+              [product.id]: reviews
+            }));
+          } catch (err) {
+            console.error('[Katalog] Error fetching reviews:', err);
+          }
         });
 
         if (token) {
