@@ -1,13 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@components/*": ["./src/components/*"],
-      "@auth/*": ["./src/auth/*"],
-      "@api/*": ["./src/api/*"]
-    },
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",

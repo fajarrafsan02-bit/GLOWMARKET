@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import { useEffect, useRef, useState } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 export const useWebSocket = (url, topic, onMessage) => {
     const [isConnected, setIsConnected] = useState(false);
@@ -14,10 +14,10 @@ export const useWebSocket = (url, topic, onMessage) => {
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
             debug: (str) => {
-                console.log('[STOMP Debug]', str);
+                console.log("[STOMP Debug]", str);
             },
             onConnect: () => {
-                console.log('[WebSocket] Connected successfully');
+                console.log("[WebSocket] Connected successfully");
                 setIsConnected(true);
 
                 // Subscribe to topic
@@ -25,24 +25,24 @@ export const useWebSocket = (url, topic, onMessage) => {
                     client.subscribe(topic, (message) => {
                         try {
                             const data = JSON.parse(message.body);
-                            console.log('[WebSocket] Message received:', data);
+                            console.log("[WebSocket] Message received:", data);
                             onMessage(data);
                         } catch (error) {
-                            console.error('[WebSocket] Error parsing message:', error);
+                            console.error("[WebSocket] Error parsing message:", error);
                         }
                     });
                 }
             },
             onDisconnect: () => {
-                console.log('[WebSocket] Disconnected');
+                console.log("[WebSocket] Disconnected");
                 setIsConnected(false);
             },
             onStompError: (frame) => {
-                console.error('[WebSocket] STOMP error:', frame);
+                console.error("[WebSocket] STOMP error:", frame);
                 setIsConnected(false);
             },
             onWebSocketError: (error) => {
-                console.error('[WebSocket] WebSocket error:', error);
+                console.error("[WebSocket] WebSocket error:", error);
                 setIsConnected(false);
             },
         });
@@ -55,7 +55,7 @@ export const useWebSocket = (url, topic, onMessage) => {
         // Cleanup on unmount
         return () => {
             if (client.active) {
-                console.log('[WebSocket] Deactivating client');
+                console.log("[WebSocket] Deactivating client");
                 client.deactivate();
             }
         };
@@ -68,7 +68,7 @@ export const useWebSocket = (url, topic, onMessage) => {
                 body: JSON.stringify(body),
             });
         } else {
-            console.warn('[WebSocket] Cannot send message - not connected');
+            console.warn("[WebSocket] Cannot send message - not connected");
         }
     };
 

@@ -12,11 +12,23 @@ dist
 dist-ssr
 *.local
 
+# Konfigurasi lokal (VITE_* env vars) — jangan di-commit
+.env
+.env.*
+!.env.example
+
+# Cache build tools
+.vite/
+.eslintcache
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
+.trae/
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj

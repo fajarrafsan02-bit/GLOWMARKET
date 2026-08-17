@@ -1,126 +1,154 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import AdminSidebar from "./AdminSidebar.jsx";
 import AdminHeader from "./AdminHeader.jsx";
-import { LogOut } from "lucide-react";
+
+import { LogOut, X } from "lucide-react";
+
 import { motion as Motion } from "framer-motion";
 
+import { useAuth } from "../context/AuthContext.jsx";
+
 export default function AdminLayout({ title, activeMenu, children }) {
-  const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme) return savedTheme === "dark";
-    return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
-  const [adminName] = useState(() => {
-    return localStorage.getItem("admin_nama") || "Admin";
-  });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
+    const navigate = useNavigate();
+    const { user, isAdmin, logout } = useAuth();
 
-  useEffect(() => {
-    const token = localStorage.getItem("admin_token");
-    if (!token) navigate("/admin/login");
-  }, [navigate]);
+    const adminName = user?.namaLengkap || "Admin";
 
-  useEffect(() => {
-    if (isDarkMode) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleLogoutClick = () => {
-    setShowLogoutConfirm(true);
-  };
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    
-    // Simulate logout delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_nama");
-    localStorage.removeItem("admin_email");
-    
-    setLoggingOut(false);
-    navigate("/admin/login");
-  };
+    const [loggingOut, setLoggingOut] = useState(false);
 
-  useEffect(() => {
-    const scriptId = "chartjs-cdn-script";
-    if (window.Chart || document.getElementById(scriptId)) return;
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+    // Lapis kedua di luar RequireAdmin (yang sudah menjaga rute ini) —
+    // dibiarkan sebagai jaring pengaman kalau komponen ini suatu saat dipakai
+    // di luar rute yang dijaga.
+    useEffect(() => {
+        if (!isAdmin) {
+            navigate("/");
+        }
+    }, [isAdmin, navigate]);
 
-  return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminSidebar activeMenu={activeMenu} onLogout={handleLogoutClick} mobileOpen={isSidebarOpen} setMobileOpen={setIsSidebarOpen} />
-      <main className="flex-1 md:ml-64">
-        <AdminHeader
-          title={title}
-          isDarkMode={isDarkMode}
-          onToggleDark={() => setIsDarkMode(!isDarkMode)}
-          adminName={adminName}
-          onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
-        />
-        {children}
-      </main>
+    const handleLogout = async () => {
+        try {
+            setLoggingOut(true);
+            await logout();
+            setShowLogoutConfirm(false);
+            navigate("/", { replace: true });
+        } finally {
+            setLoggingOut(false);
+        }
+    };
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <Motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-700"
-          >
-            <div className="px-6 py-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                  <LogOut className="w-6 h-6 text-red-600 dark:text-red-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Konfirmasi Logout</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Anda yakin ingin keluar dari akun admin?</p>
-                </div>
-              </div>
-              <div className="mt-5 flex gap-3">
-                <button
-                  onClick={() => { setShowLogoutConfirm(false); handleLogout(); }}
-                  disabled={loggingOut}
-                  className="flex-1 px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-semibold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+    return (
+        <div className="min-h-screen bg-[#f7f7f8] dark:bg-gray-950 text-gray-900 dark:text-white">
+            <AdminSidebar
+                activeMenu={activeMenu}
+                onLogout={() => setShowLogoutConfirm(true)}
+                mobileOpen={isSidebarOpen}
+                setMobileOpen={setIsSidebarOpen}
+            />
+
+            <main className="min-h-screen md:ml-64">
+                <AdminHeader
+                    title={title}
+                    adminName={adminName}
+                    onToggleSidebar={() => setIsSidebarOpen((value) => !value)}
+                />
+
+                {children}
+            </main>
+
+            {/* =====================================================
+                LOGOUT
+            ====================================================== */}
+
+            {showLogoutConfirm && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+                    onClick={() => {
+                        if (!loggingOut) {
+                            setShowLogoutConfirm(false);
+                        }
+                    }}
                 >
-                  {loggingOut ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Keluar...</span>
-                    </>
-                  ) : (
-                    "Ya, Keluar"
-                  )}
-                </button>
-                <button
-                  onClick={() => setShowLogoutConfirm(false)}
-                  disabled={loggingOut}
-                  className="flex-1 px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  Batal
-                </button>
-              </div>
-            </div>
-          </Motion.div>
+                    <Motion.div
+                        initial={{
+                            opacity: 0,
+                            scale: 0.96,
+                            y: 8,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            scale: 1,
+                            y: 0,
+                        }}
+                        onClick={(event) => event.stopPropagation()}
+                        className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl"
+                    >
+                        <div className="p-5">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 shrink-0 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                                    <LogOut className="w-5 h-5 text-red-500" />
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                            Keluar dari Admin
+                                        </h3>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowLogoutConfirm(false)}
+                                            disabled={loggingOut}
+                                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 disabled:opacity-50"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+
+                                    <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                                        Anda yakin ingin keluar dari dashboard admin?
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-5 flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowLogoutConfirm(false)}
+                                    disabled={loggingOut}
+                                    className="flex-1 h-10 rounded-lg border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+                                >
+                                    Batal
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    disabled={loggingOut}
+                                    className="flex-1 h-10 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                                >
+                                    {loggingOut ? (
+                                        <>
+                                            <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                                            Keluar...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <LogOut className="w-4 h-4" />
+                                            Keluar
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </Motion.div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }

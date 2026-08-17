@@ -16,18 +16,11 @@ export const useWebSocketPresence = (userId, userEmail, isLoggedIn) => {
             return;
         }
 
-        const token = localStorage.getItem("user_token");
-        if (!token) {
-            return;
-        }
-
-        const socketUrl = "http://localhost:8080/ws";
+        // Cookie httpOnly ikut terkirim otomatis pada handshake SockJS.
+        const socketUrl = "/ws";
 
         const client = new Client({
             webSocketFactory: () => new SockJS(socketUrl),
-            connectHeaders: {
-                Authorization: `Bearer ${token}`,
-            },
             onConnect: () => {
                 console.log("[WebSocket Presence] Connected - User is now ONLINE");
                 console.log("[WebSocket Presence] Backend auto-detected via SessionConnectEvent");
@@ -36,7 +29,9 @@ export const useWebSocketPresence = (userId, userEmail, isLoggedIn) => {
             },
             onDisconnect: () => {
                 console.log("[WebSocket Presence] Disconnected - User is now OFFLINE");
-                console.log("[WebSocket Presence] Backend auto-detected via SessionDisconnectEvent");
+                console.log(
+                    "[WebSocket Presence] Backend auto-detected via SessionDisconnectEvent",
+                );
                 // Backend otomatis tandai OFFLINE dari DISCONNECT event (WebSocketEventListener)
             },
             onStompError: (frame) => {
@@ -55,7 +50,7 @@ export const useWebSocketPresence = (userId, userEmail, isLoggedIn) => {
         // Cleanup on unmount or logout
         return () => {
             console.log("[WebSocket Presence] Cleaning up...");
-            
+
             // Deactivate client - backend will detect DISCONNECT and mark user OFFLINE
             if (client) {
                 client.deactivate();
