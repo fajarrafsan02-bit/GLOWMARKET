@@ -22,6 +22,14 @@ function urlAuthKhusus(url) {
 }
 
 function cobaRefresh() {
+    /* Tanpa penanda sesi, cookie refresh dipastikan tidak ada — entah karena
+       pengunjung memang belum pernah login atau sesinya sudah dicabut.
+       Menembak /auth/refresh dalam keadaan itu hanya menghasilkan 401 yang
+       sudah bisa ditebak, lengkap dengan catatan error di sisi server. */
+    if (!localStorage.getItem("app_has_session")) {
+        return Promise.resolve(false);
+    }
+
     if (!refreshPromise) {
         refreshPromise = api
             .post("/auth/refresh", {}, { _skipRefresh: true, _skipAuthLogout: true })
