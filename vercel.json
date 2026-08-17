@@ -13,6 +13,10 @@
             "destination": "https://rest-api-glowmarket.onrender.com/uploads/:path*"
         },
         {
+            "source": "/ws/:path*",
+            "destination": "https://rest-api-glowmarket.onrender.com/ws/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

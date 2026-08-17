@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import api from "../api/Axios.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { WS_URL } from "../utils/apiBase.js";
+import buatSockJS from "../utils/socketFactory.js";
 
 export default function useUserChat({ defaultMessage, chatContext: incomingContext } = {}) {
     const { isAuthenticated } = useAuth();
@@ -165,10 +164,9 @@ export default function useUserChat({ defaultMessage, chatContext: incomingConte
         }
 
         // Cookie httpOnly ikut terkirim otomatis pada handshake SockJS.
-        const socketUrl = WS_URL;
 
         const client = new Client({
-            webSocketFactory: () => new SockJS(socketUrl),
+            webSocketFactory: buatSockJS,
             reconnectDelay: 5000,
             heartbeatIncoming: 10000,
             heartbeatOutgoing: 10000,

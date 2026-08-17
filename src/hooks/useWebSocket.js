@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
 
-export const useWebSocket = (url, topic, onMessage) => {
+import buatSockJS from "../utils/socketFactory.js";
+
+/**
+ * Alamat endpoint tidak lagi menjadi parameter: seluruh koneksi realtime
+ * memakai satu endpoint yang sama, dan pemilihannya ditangani socketFactory.
+ */
+export const useWebSocket = (topic, onMessage) => {
     const [isConnected, setIsConnected] = useState(false);
     const clientRef = useRef(null);
 
     useEffect(() => {
         // Create STOMP client
         const client = new Client({
-            webSocketFactory: () => new SockJS(url),
+            webSocketFactory: buatSockJS,
             reconnectDelay: 5000,
             heartbeatIncoming: 4000,
             heartbeatOutgoing: 4000,
@@ -59,7 +64,7 @@ export const useWebSocket = (url, topic, onMessage) => {
                 client.deactivate();
             }
         };
-    }, [url, topic]);
+    }, [topic]);
 
     const sendMessage = (destination, body) => {
         if (clientRef.current && clientRef.current.connected) {

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/Axios.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useWebSocket } from "../hooks/useWebSocket";
-import { WS_URL } from "../utils/apiBase.js";
 
 export default function useAdminNotifications() {
     const navigate = useNavigate();
@@ -38,7 +37,6 @@ export default function useAdminNotifications() {
     }, []);
 
     const { isConnected } = useWebSocket(
-        WS_URL,
         "/topic/admin/notifications",
         handleNewNotification,
     );

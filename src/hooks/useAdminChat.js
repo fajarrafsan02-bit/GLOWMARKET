@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../api/Axios.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { WS_URL } from "../utils/apiBase.js";
+import buatSockJS from "../utils/socketFactory.js";
 
 export default function useAdminChat() {
     const { isAdmin } = useAuth();
@@ -181,10 +180,9 @@ export default function useAdminChat() {
     useEffect(() => {
         if (!adminProfile || !isAdmin) return;
         // Cookie httpOnly ikut terkirim otomatis pada handshake SockJS.
-        const socketUrl = WS_URL;
 
         const client = new Client({
-            webSocketFactory: () => new SockJS(socketUrl),
+            webSocketFactory: buatSockJS,
             onConnect: () => {
                 console.log("[AdminChat] WebSocket Connected");
 

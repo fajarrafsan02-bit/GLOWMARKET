@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-import { WS_URL } from "../utils/apiBase.js";
+import buatSockJS from "../utils/socketFactory.js";
 
 /**
  * Custom hook for WebSocket user presence tracking
@@ -19,10 +18,9 @@ export const useWebSocketPresence = (userId, userEmail, isLoggedIn) => {
         }
 
         // Cookie httpOnly ikut terkirim otomatis pada handshake SockJS.
-        const socketUrl = WS_URL;
 
         const client = new Client({
-            webSocketFactory: () => new SockJS(socketUrl),
+            webSocketFactory: buatSockJS,
             onConnect: () => {
                 console.log("[WebSocket Presence] Connected - User is now ONLINE");
                 console.log("[WebSocket Presence] Backend auto-detected via SessionConnectEvent");
