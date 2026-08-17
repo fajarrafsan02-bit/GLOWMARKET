@@ -1,6 +1,18 @@
 {
     "rewrites": [
         {
+            "source": "/api/:path*",
+            "destination": "https://rest-api-glowmarket.onrender.com/api/:path*"
+        },
+        {
+            "source": "/auth/:path*",
+            "destination": "https://rest-api-glowmarket.onrender.com/auth/:path*"
+        },
+        {
+            "source": "/uploads/:path*",
+            "destination": "https://rest-api-glowmarket.onrender.com/uploads/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
