@@ -14,7 +14,10 @@ export const emptyForm = () => ({
     hargaModal: "",
     hargaModalAwal: 0,
     stock: "0",
-    karatEmas: "",
+    /* Disamakan dengan pilihan yang tampil lebih dulu di dropdown. Bila
+       dibiarkan kosong, form terlihat memilih 24K padahal state masih ""
+       dan validasi menolaknya dengan alasan karat belum diisi. */
+    karatEmas: 24,
     beratGram: "",
     status: "TERSEDIA",
     varian: [],
