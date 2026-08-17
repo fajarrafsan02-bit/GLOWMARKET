@@ -14,10 +14,28 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
 /**
- * Endpoint SockJS untuk koneksi STOMP.
+ * Alamat backend khusus untuk WebSocket.
  *
- * Ikut memakai jalur relatif. Rewrite Vercel tidak meneruskan upgrade
- * WebSocket, tetapi SockJS otomatis turun ke transport berbasis HTTP
- * (xhr-streaming/polling) yang tetap melewati proxy dengan benar.
+ * Berbeda dari API biasa, koneksi ini TIDAK boleh lewat rewrite Vercel.
+ * Rewrite hanya meneruskan HTTP biasa: upgrade WebSocket ditolak, dan
+ * transport cadangan SockJS pun gagal karena rewrite mengubah metodenya
+ * menjadi GET (muncul sebagai rentetan 405 Method Not Allowed) lalu
+ * mengembalikan index.html sehingga SockJS mencoba mengurainya sebagai
+ * JavaScript.
+ *
+ * Alamat penuh dipakai bila tersedia. Server sudah mendaftarkan origin ini
+ * pada endpoint /ws, dan cookie autentikasi ikut terkirim saat handshake
+ * karena atributnya SameSite=None; Secure.
+ *
+ * Saat pengembangan nilainya dibiarkan kosong supaya proxy Vite — yang
+ * memang mendukung upgrade WebSocket — tetap yang menangani.
  */
-export const WS_URL = `${API_BASE_URL}/ws`;
+const WS_BAWAAN_PRODUKSI = "https://rest-api-glowmarket.onrender.com";
+
+export const WS_BASE_URL =
+    import.meta.env.VITE_WS_URL ||
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.PROD ? WS_BAWAAN_PRODUKSI : "");
+
+/** Endpoint SockJS untuk koneksi STOMP. */
+export const WS_URL = `${WS_BASE_URL}/ws`;
