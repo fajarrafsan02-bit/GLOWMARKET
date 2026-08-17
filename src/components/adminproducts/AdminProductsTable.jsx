@@ -1,5 +1,7 @@
 import { Edit3, Trash2, Package } from "lucide-react";
 
+import { statusMenurutStok } from "../../utils/productStatus.js";
+
 import ProductStatusBadge from "./ProductStatusBadge.jsx";
 import QuickStockCell from "./QuickStockCell.jsx";
 
@@ -153,11 +155,14 @@ export default function AdminProductsTable({
 
                                 <td className="px-6 py-4 text-center">
                                     <div className="flex flex-col items-center gap-1.5">
-                                        <ProductStatusBadge status={product.status} />
+                                        <ProductStatusBadge status={product.status} stock={product.stock} />
 
                                         {/* Ubah ketersediaan tanpa membuka form penuh */}
                                         <select
-                                            value={product.status || "TERSEDIA"}
+                                            value={statusMenurutStok(
+                                                product.stock,
+                                                product.status,
+                                            )}
                                             onChange={(event) =>
                                                 onUpdateStatus(product, event.target.value)
                                             }
@@ -165,9 +170,19 @@ export default function AdminProductsTable({
                                             aria-label="Ubah status produk"
                                             className="h-6 px-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-[10px] text-gray-500 dark:text-gray-400 focus:outline-none focus:border-amber-500 disabled:opacity-40"
                                         >
-                                            <option value="TERSEDIA">Tersedia</option>
+                                            <option
+                                                value="TERSEDIA"
+                                                disabled={Number(product.stock) <= 0}
+                                            >
+                                                Tersedia
+                                            </option>
                                             <option value="TIDAK_TERSEDIA">Tidak Tersedia</option>
-                                            <option value="HABIS">Habis</option>
+                                            <option
+                                                value="HABIS"
+                                                disabled={Number(product.stock) > 0}
+                                            >
+                                                Habis
+                                            </option>
                                         </select>
                                     </div>
                                 </td>

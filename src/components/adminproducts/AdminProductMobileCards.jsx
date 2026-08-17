@@ -45,7 +45,7 @@ export default function AdminProductMobileCards({ items, formatPrice, onEdit, on
 
                             {/* Status */}
                             <div className="absolute top-3 right-3">
-                                <ProductStatusBadge status={product.status} />
+                                <ProductStatusBadge status={product.status} stock={product.stock} />
                             </div>
                         </div>
 

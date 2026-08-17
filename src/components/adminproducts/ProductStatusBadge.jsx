@@ -1,5 +1,12 @@
-export default function ProductStatusBadge({ status }) {
-    const normalizedStatus = String(status || "").toUpperCase();
+import { statusMenurutStok } from "../../utils/productStatus.js";
+
+export default function ProductStatusBadge({ status, stock }) {
+    /* Stok jadi acuan supaya baris lama yang terlanjur tersimpan sebagai
+       TERSEDIA dengan stok 0 tetap tampil apa adanya bagi admin. */
+    const normalizedStatus =
+        stock === undefined
+            ? String(status || "").toUpperCase()
+            : statusMenurutStok(stock, String(status || "").toUpperCase());
 
     const config =
         normalizedStatus === "TERSEDIA"

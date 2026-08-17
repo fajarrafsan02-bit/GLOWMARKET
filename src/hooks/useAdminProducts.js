@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import api from "../api/Axios.jsx";
 import { toMoney } from "../utils/format.js";
 import { getProductImages } from "../utils/productImages.js";
+import { statusMenurutStok } from "../utils/productStatus.js";
 
 /* Pilihan karat yang ditampilkan dropdown saat belum ada nilai tersimpan.
    Didefinisikan sekali di sini supaya form, mode edit, dan validasi tidak
@@ -24,7 +25,9 @@ export const emptyForm = () => ({
        dan validasi menolaknya dengan alasan karat belum diisi. */
     karatEmas: 24,
     beratGram: "",
-    status: "TERSEDIA",
+    /* Produk baru selalu mulai tanpa stok — barang masuk dicatat lewat
+       Akuntansi → Pembelian, jadi statusnya mengikuti. */
+    status: "HABIS",
     varian: [],
 });
 
@@ -152,7 +155,7 @@ export default function useAdminProducts() {
                agar sama dengan pilihan yang ditampilkan dropdown. */
             karatEmas: product.karatEmas ?? KARAT_BAWAAN,
             beratGram: product.beratGram ?? "",
-            status: product.status || "TERSEDIA",
+            status: statusMenurutStok(product.stock, product.status),
             varian: Array.isArray(product.varian)
                 ? product.varian.map((v) => ({
                       id: v.id,

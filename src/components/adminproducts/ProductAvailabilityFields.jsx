@@ -1,8 +1,13 @@
 import { PRODUCT_CATEGORIES } from "../../utils/productCategory.js";
+import { statusMenurutStok } from "../../utils/productStatus.js";
 
 import { SectionLabel, FieldLabel, inputClass } from "./formControls.jsx";
 
 export default function ProductAvailabilityFields({ form, onChange }) {
+    /* Tanpa stok, satu-satunya status yang masuk akal selain disembunyikan
+       admin adalah HABIS — server akan memaksakan hal yang sama. */
+    const tanpaStok = Number(form.stock) <= 0 || !form.stock;
+
     return (
         <div>
             <SectionLabel>Ketersediaan</SectionLabel>
@@ -38,7 +43,7 @@ export default function ProductAvailabilityFields({ form, onChange }) {
                 <FieldLabel>Status Produk</FieldLabel>
 
                 <select
-                    value={form.status}
+                    value={statusMenurutStok(form.stock, form.status)}
                     onChange={(event) =>
                         onChange({
                             ...form,
@@ -47,12 +52,22 @@ export default function ProductAvailabilityFields({ form, onChange }) {
                     }
                     className={inputClass}
                 >
-                    <option value="TERSEDIA">Tersedia</option>
+                    <option value="TERSEDIA" disabled={tanpaStok}>
+                        Tersedia
+                    </option>
 
                     <option value="TIDAK_TERSEDIA">Tidak Tersedia</option>
 
-                    <option value="HABIS">Habis</option>
+                    <option value="HABIS" disabled={!tanpaStok}>
+                        Habis
+                    </option>
                 </select>
+
+                <p className="mt-1.5 text-[10px] text-gray-400">
+                    {tanpaStok
+                        ? "Stok masih 0, jadi status mengikuti Habis. Tambah stok lewat Akuntansi → Pembelian."
+                        : "Pilih Tidak Tersedia untuk menyembunyikan produk dari katalog."}
+                </p>
             </div>
         </div>
     );
