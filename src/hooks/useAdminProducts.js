@@ -4,6 +4,11 @@ import api from "../api/Axios.jsx";
 import { toMoney } from "../utils/format.js";
 import { getProductImages } from "../utils/productImages.js";
 
+/* Pilihan karat yang ditampilkan dropdown saat belum ada nilai tersimpan.
+   Didefinisikan sekali di sini supaya form, mode edit, dan validasi tidak
+   pernah berbeda pendapat soal nilai bawaannya. */
+export const KARAT_BAWAAN = 24;
+
 export const emptyForm = () => ({
     nama: "",
     deskripsi: "",
@@ -143,7 +148,9 @@ export default function useAdminProducts() {
                     : "",
             hargaModalAwal: toMoney(product.hargaModal),
             stock: product.stock ?? 0,
-            karatEmas: product.karatEmas ?? "",
+            /* Produk lama bisa saja belum punya karat. Nilai bawaan dipakai
+               agar sama dengan pilihan yang ditampilkan dropdown. */
+            karatEmas: product.karatEmas ?? KARAT_BAWAAN,
             beratGram: product.beratGram ?? "",
             status: product.status || "TERSEDIA",
             varian: Array.isArray(product.varian)
@@ -222,7 +229,10 @@ export default function useAdminProducts() {
            produk lama memakai angka yang sudah tersimpan. */
         const stockNum = editingId ? Number(form.stock) || 0 : 0;
 
-        const karatNum = Number(form.karatEmas);
+        /* Dropdown karat tidak punya opsi kosong dan sudah menampilkan nilai
+           bawaan lewat fallback yang sama. Menyamakannya di sini mencegah
+           penolakan pada form yang di layar terlihat sudah terisi. */
+        const karatNum = Number(form.karatEmas || KARAT_BAWAAN);
 
         const beratNum = Number(form.beratGram);
 

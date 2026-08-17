@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 
+import { KARAT_BAWAAN } from "../../hooks/useAdminProducts.js";
 import { SectionLabel, FieldLabel, inputClass } from "./formControls.jsx";
 
 export default function ProductPriceFields({ form, isEdit, modalBerubah, onChange, onPriceChange, onCostChange }) {
@@ -116,7 +117,7 @@ export default function ProductPriceFields({ form, isEdit, modalBerubah, onChang
                     <FieldLabel>Karat Emas</FieldLabel>
 
                     <select
-                        value={form.karatEmas || 24}
+                        value={form.karatEmas || KARAT_BAWAAN}
                         onChange={(event) =>
                             onChange({
                                 ...form,
