@@ -113,7 +113,6 @@ export default function Header({ setShowAuth }) {
                                 markAllNotificationsAsRead={markAllNotificationsAsRead}
                                 markNotificationAsRead={markNotificationAsRead}
                                 fetchNotifications={fetchNotifications}
-                                handleAuthShow={handleAuthShow}
                                 navigate={navigate}
                             />
 

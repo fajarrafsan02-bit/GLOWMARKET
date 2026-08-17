@@ -10,24 +10,28 @@ export default function HeaderNotifications({
     markAllNotificationsAsRead,
     markNotificationAsRead,
     fetchNotifications,
-    handleAuthShow,
     navigate,
 }) {
+    /* Notifikasi hanya berarti bagi pengguna yang sudah masuk. Menampilkan
+       loncengnya bagi tamu membuat header terasa penuh fitur yang sebenarnya
+       tidak bisa dipakai — ajakan masuk sudah diwakili tombol tersendiri. */
+    if (!isLoggedIn) {
+        return null;
+    }
+
     return (
         <div className="hidden xs:block relative" ref={notificationRef}>
             <button
                 onClick={() => {
-                    if (isLoggedIn) {
-                        setShowNotifications(!showNotifications);
-                        if (!showNotifications) fetchNotifications();
-                    } else {
-                        handleAuthShow(true);
-                    }
+                    setShowNotifications(!showNotifications);
+                    if (!showNotifications) fetchNotifications();
                 }}
                 className={`relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg transition-colors ${showNotifications ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                aria-label="Notifikasi"
+                title="Notifikasi"
             >
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-                {isLoggedIn && notificationCount > 0 && (
+                {notificationCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                         {notificationCount > 99 ? "99+" : notificationCount}
                     </span>
@@ -35,7 +39,7 @@ export default function HeaderNotifications({
             </button>
 
             {/* Dropdown */}
-            {showNotifications && isLoggedIn && (
+            {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-[70vh] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">

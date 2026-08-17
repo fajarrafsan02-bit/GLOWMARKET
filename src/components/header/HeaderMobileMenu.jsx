@@ -1,3 +1,4 @@
+import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const mobileLinks = [
@@ -58,6 +59,23 @@ export default function HeaderMobileMenu({
                         </Link>
                     );
                 })}
+
+                {/* Ajakan masuk ditaruh di akhir daftar supaya tamu yang
+                    membuka menu langsung melihat status akunnya, bukan baru
+                    tahu setelah menekan tautan yang ternyata terkunci. */}
+                {!isLoggedIn && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (handleAuthShow) handleAuthShow(true);
+                            if (setMobileMenuOpen) setMobileMenuOpen(false);
+                        }}
+                        className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-amber-500 text-amber-600 dark:text-amber-400 text-sm font-semibold hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                    >
+                        <LogIn className="w-4 h-4" />
+                        Masuk / Daftar
+                    </button>
+                )}
             </nav>
         </div>
     );

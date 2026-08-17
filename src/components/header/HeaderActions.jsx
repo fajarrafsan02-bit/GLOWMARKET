@@ -1,4 +1,4 @@
-import { MessageCircle, Heart, User, UserCheck, ShoppingBag } from "lucide-react";
+import { MessageCircle, Heart, LogIn, UserCheck, ShoppingBag } from "lucide-react";
 
 export default function HeaderActions({
     isLoggedIn,
@@ -69,7 +69,9 @@ export default function HeaderActions({
                 {badge(wishlistCount)}
             </button>
 
-            {/* Profile / Login */}
+            {/* Profil bila sudah masuk, ajakan login bila belum.
+                Sebelumnya keduanya sama-sama ikon orang berwarna amber
+                sehingga status masuk/belum tidak terbaca sekilas. */}
             {isLoggedIn ? (
                 <button
                     type="button"
@@ -84,11 +86,14 @@ export default function HeaderActions({
                 <button
                     type="button"
                     onClick={() => handleAuthShow(true)}
-                    className={actionButton(false)}
-                    aria-label="Masuk / Login"
-                    title="Masuk / Login"
+                    className="flex items-center gap-1.5 h-8 sm:h-9 px-2.5 sm:px-3 rounded-lg border border-amber-500 text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20 transition-all duration-200 active:scale-95"
+                    aria-label="Masuk ke akun"
+                    title="Masuk ke akun"
                 >
-                    <User className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-amber-600 dark:text-amber-400" />
+                    <LogIn className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                    {/* Teks disembunyikan di layar sempit supaya deretan
+                        tombol lain tidak terdesak keluar. */}
+                    <span className="hidden sm:inline text-xs font-semibold">Masuk</span>
                 </button>
             )}
 
