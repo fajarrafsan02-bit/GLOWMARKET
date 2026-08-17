@@ -11,6 +11,10 @@ function normalizeUser(raw) {
         email: raw.email,
         noHp: raw.noHp,
         role: raw.role,
+        /* Ikut disalin karena menentukan apakah panel verifikasi perlu
+           ditampilkan. Tanpa baris ini nilainya selalu undefined dan
+           pengguna yang emailnya sudah terbukti tetap diminta verifikasi. */
+        emailTerverifikasi: raw.emailTerverifikasi,
     };
 }
 
