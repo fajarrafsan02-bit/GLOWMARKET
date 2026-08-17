@@ -6,6 +6,7 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import AuthModal from "../components/AuthModal.jsx";
 
+import EmailVerificationPanel from "../components/EmailVerificationPanel.jsx";
 import ProfileHeaderCard from "../components/userprofile/ProfileHeaderCard.jsx";
 import ProfileNotice from "../components/userprofile/ProfileNotice.jsx";
 import ProfileContentHeader from "../components/userprofile/ProfileContentHeader.jsx";
@@ -60,6 +61,8 @@ export default function UserProfile() {
         activeTabData,
         removeFromWishlist,
         addToCart,
+        emailTerverifikasi,
+        tandaiEmailTerverifikasi,
     } = useUserProfile();
 
     return (
@@ -98,6 +101,17 @@ export default function UserProfile() {
                 ===================================================== */}
 
                 <ProfileNotice notice={notice} noticeType={noticeType} />
+
+                {/* Satu-satunya tempat pengguna bisa menuntaskan verifikasi
+                    tanpa lebih dulu menabrak penolakan di checkout. */}
+                {!emailTerverifikasi && (
+                    <div className="mb-5">
+                        <EmailVerificationPanel
+                            email={userEmail}
+                            onVerified={tandaiEmailTerverifikasi}
+                        />
+                    </div>
+                )}
 
                 {/* ====================================================
                     ACCOUNT LAYOUT

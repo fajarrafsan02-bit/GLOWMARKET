@@ -17,6 +17,12 @@ export default function useUserProfile() {
     const [userEmail, setUserEmail] = useState(user?.email || "email@contoh.com");
     const [userPhone, setUserPhone] = useState(user?.noHp || "");
 
+    /* Disimpan terpisah agar panel verifikasi bisa langsung menghilang begitu
+       kode diterima, tanpa menunggu profil dimuat ulang dari server. */
+    const [emailTerverifikasi, setEmailTerverifikasi] = useState(
+        Boolean(user?.emailTerverifikasi),
+    );
+
     const [activeTab, setActiveTab] = useState("profile");
 
     const [notice, setNotice] = useState("");
@@ -51,6 +57,15 @@ export default function useUserProfile() {
                 setNotice("");
             }, timeout);
         }
+    };
+
+    /* Dipanggil panel verifikasi setelah kode diterima server. AuthContext
+       ikut dimuat ulang supaya halaman lain — terutama checkout — melihat
+       status barunya tanpa perlu login ulang. */
+    const tandaiEmailTerverifikasi = () => {
+        setEmailTerverifikasi(true);
+        notify("Email berhasil diverifikasi.", "success");
+        refresh();
     };
 
     const addressForm = useAddressForm({
@@ -115,6 +130,12 @@ export default function useUserProfile() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab]);
+
+    /* Profil kerap selesai dimuat setelah komponen ini dipasang, jadi status
+       verifikasi diikutkan agar panelnya tidak salah tampil sesaat. */
+    useEffect(() => {
+        setEmailTerverifikasi(Boolean(user?.emailTerverifikasi));
+    }, [user?.emailTerverifikasi]);
 
     useEffect(() => {
         if (activeTab !== "reviews" || !isAuthenticated) {
@@ -369,6 +390,8 @@ export default function useUserProfile() {
         addressForm,
         removeFromWishlist,
         addToCart,
+        emailTerverifikasi,
+        tandaiEmailTerverifikasi,
         saveProfile,
         syncPayment,
         handleLogout,
