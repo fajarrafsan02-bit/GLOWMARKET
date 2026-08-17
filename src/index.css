@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Breakpoint tambahan untuk layar ponsel sempit.
+ *
+ * Tailwind v4 tidak menyediakan "xs" bawaan dan konfigurasinya kini berada
+ * di CSS, bukan tailwind.config.js. Tanpa deklarasi ini seluruh kelas xs:*
+ * yang dipakai di 15 berkas tidak menghasilkan CSS sama sekali — termasuk
+ * "hidden xs:block" pada lonceng notifikasi, yang membuatnya tersembunyi
+ * permanen di semua ukuran layar. */
+@theme {
+    --breakpoint-xs: 25rem;
+}
+
 @keyframes marquee {
     0% {
         transform: translateX(0);
