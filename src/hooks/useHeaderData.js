@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import api from "../api/Axios.jsx";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import { WS_URL } from "../utils/apiBase.js";
 
 export default function useHeaderData(isLoggedIn, userId) {
     const [cartCount, setCartCount] = useState(0);
@@ -169,7 +170,7 @@ export default function useHeaderData(isLoggedIn, userId) {
 
         // Cookie httpOnly ikut terkirim otomatis pada handshake SockJS
         // (sama-origin lewat proxy Vite di dev) — tidak perlu connectHeaders lagi.
-        const socketUrl = "/ws";
+        const socketUrl = WS_URL;
         const client = new Client({
             webSocketFactory: () => new SockJS(socketUrl),
             reconnectDelay: 5000,

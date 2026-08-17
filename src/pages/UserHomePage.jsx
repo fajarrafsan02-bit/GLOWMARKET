@@ -145,7 +145,7 @@ export default function UserHomePage() {
                 variantId,
                 quantity: 1,
             });
-            window.dispatchEvent(new Event("cart:updated"));
+            window.dispatchEvent(new Event("cart:update"));
             notify("Produk berhasil ditambahkan ke keranjang");
         } catch {
             notify("Gagal menambahkan ke keranjang");
