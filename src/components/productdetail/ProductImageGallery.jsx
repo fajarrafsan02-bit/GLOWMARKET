@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion as Motion } from "framer-motion";
 
@@ -7,11 +7,18 @@ import { getProductImages, isRemoteImage } from "../../utils/productImages.js";
 
 export default function ProductImageGallery({ product, className = "" }) {
     const images = getProductImages(product).filter(isRemoteImage);
+    const kunciFoto = `${product?.id ?? ""}|${images.join("|")}`;
+
     const [index, setIndex] = useState(0);
 
-    useEffect(() => {
+    /* Ganti produk berarti mulai lagi dari foto pertama. Penyetelan ulang
+       dilakukan saat render — bukan lewat efek — supaya tidak ada satu frame
+       pun yang sempat menampilkan foto lama dengan nomor urut foto baru. */
+    const [kunciTerakhir, setKunciTerakhir] = useState(kunciFoto);
+    if (kunciTerakhir !== kunciFoto) {
+        setKunciTerakhir(kunciFoto);
         setIndex(0);
-    }, [product?.id, images.join("|")]);
+    }
 
     const count = images.length;
     const safeIndex = Math.min(index, Math.max(count - 1, 0));

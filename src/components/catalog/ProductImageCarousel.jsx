@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import useImageSwipe from "../../hooks/useImageSwipe.js";
@@ -6,11 +6,18 @@ import { isRemoteImage } from "../../utils/productImages.js";
 
 export default function ProductImageCarousel({ images = [], alt = "Produk" }) {
     const urls = images.filter(isRemoteImage);
+    const kunciFoto = urls.join("|");
+
     const [index, setIndex] = useState(0);
 
-    useEffect(() => {
+    /* Ganti produk berarti mulai lagi dari foto pertama. Penyetelan ulang
+       dilakukan saat render — bukan lewat efek — supaya tidak ada satu frame
+       pun yang sempat menampilkan foto lama dengan nomor urut foto baru. */
+    const [kunciTerakhir, setKunciTerakhir] = useState(kunciFoto);
+    if (kunciTerakhir !== kunciFoto) {
+        setKunciTerakhir(kunciFoto);
         setIndex(0);
-    }, [urls.join("|")]);
+    }
 
     const count = urls.length;
     const safeIndex = Math.min(index, Math.max(count - 1, 0));

@@ -32,7 +32,15 @@ function sleep(ms) {
  */
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+
+    /*
+     * Penanda sesi dibaca sekali saat komponen dibuat, bukan di dalam efek.
+     * Nilainya menentukan apakah aplikasi perlu menunggu jawaban server:
+     * pengunjung tanpa penanda langsung dianggap selesai memuat, sehingga
+     * tidak ada perubahan state susulan hanya untuk mematikan spinner.
+     */
+    const [punyaSesi] = useState(() => Boolean(localStorage.getItem("app_has_session")));
+    const [loading, setLoading] = useState(punyaSesi);
 
     const refresh = useCallback(async () => {
         let lastError;
@@ -77,9 +85,29 @@ export function AuthProvider({ children }) {
          * belum login sampai mereka login ulang — trade-off yang diterima
          * demi tidak memicu 401 percuma di setiap kunjungan baru.
          */
-        const punyaSesi = Boolean(localStorage.getItem("app_has_session"));
-        (punyaSesi ? refresh() : Promise.resolve()).finally(() => setLoading(false));
-    }, [refresh]);
+        if (!punyaSesi) {
+            return;
+        }
+
+        let batal = false;
+
+        /* Aturan set-state-in-effect menyasar setState yang dijalankan
+           serentak saat efek berjalan. Di sini pemanggilannya justru
+           tertunda sampai server menjawab — bentuk yang memang dianjurkan
+           untuk pengambilan data — tetapi aturannya belum bisa membedakan
+           keduanya. */
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        refresh().finally(() => {
+            // Komponen bisa saja sudah dilepas sebelum server menjawab.
+            if (!batal) {
+                setLoading(false);
+            }
+        });
+
+        return () => {
+            batal = true;
+        };
+    }, [refresh, punyaSesi]);
 
     useEffect(() => {
         const cobaPulihkan = () => {
