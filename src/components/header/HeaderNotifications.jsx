@@ -1,4 +1,4 @@
-import { Bell, CheckCheck, Star } from "lucide-react";
+import { Bell, CheckCheck, Star, X } from "lucide-react";
 
 export default function HeaderNotifications({
     notificationRef,
@@ -38,29 +38,61 @@ export default function HeaderNotifications({
                 )}
             </button>
 
-            {/* Dropdown. Lebarnya dibatasi lebar layar dikurangi padding header
-                supaya panel tidak meluber ke luar tepi di ponsel sempit —
-                loncengnya bukan elemen paling kanan di deretan tombol. */}
+            {/* Latar gelap khusus ponsel: menandai panel sebagai lapisan
+                terpisah sekaligus memberi sasaran tutup di luar sheet. */}
             {showNotifications && (
-                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-80 sm:max-w-96 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-[70vh] overflow-hidden flex flex-col">
+                <div
+                    onClick={() => setShowNotifications(false)}
+                    className="sm:hidden fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60]"
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* Di ponsel tampil sebagai bottom sheet selebar layar — panel
+                selebar 320px yang berlabuh pada lonceng terlalu sempit dan
+                jauh dari jangkauan ibu jari. Mulai sm kembali jadi dropdown. */}
+            {showNotifications && (
+                <div
+                    role="dialog"
+                    aria-label="Notifikasi"
+                    className="fixed inset-x-0 bottom-0 z-[60] w-full max-h-[80vh] rounded-t-2xl border-t sm:absolute sm:inset-auto sm:right-0 sm:bottom-auto sm:z-50 sm:mt-2 sm:w-96 sm:max-h-[70vh] sm:rounded-xl sm:border bg-white dark:bg-gray-800 shadow-xl border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
+                >
+                    {/* Gagang geser: penanda lazim bahwa panel bisa ditutup. */}
+                    <div className="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
+                        <span className="w-9 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    </div>
+
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                             Notifikasi
                         </h3>
-                        {notificationCount > 0 && (
+
+                        <div className="flex items-center gap-1">
+                            {notificationCount > 0 && (
+                                <button
+                                    onClick={markAllNotificationsAsRead}
+                                    className="flex items-center gap-1.5 px-2 py-1.5 -mr-0.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                >
+                                    <CheckCheck className="w-3.5 h-3.5" />
+                                    Tandai dibaca
+                                </button>
+                            )}
+
                             <button
-                                onClick={markAllNotificationsAsRead}
-                                className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                                type="button"
+                                onClick={() => setShowNotifications(false)}
+                                className="sm:hidden w-8 h-8 -mr-1.5 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                aria-label="Tutup notifikasi"
                             >
-                                <CheckCheck className="w-3.5 h-3.5" />
-                                Tandai dibaca
+                                <X className="w-4 h-4" />
                             </button>
-                        )}
+                        </div>
                     </div>
 
-                    {/* List */}
-                    <div className="overflow-y-auto flex-1">
+                    {/* Daftar. Padding bawah menyisakan ruang bagi bilah
+                        gestur ponsel agar entri terakhir tetap bisa disentuh. */}
+                    <div className="overflow-y-auto overscroll-contain flex-1 pb-[env(safe-area-inset-bottom)]">
                         {notifications.length === 0 ? (
                             <div className="p-8 text-center">
                                 <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
@@ -79,7 +111,7 @@ export default function HeaderNotifications({
                                         if (notif.paymentId) navigate(`/pesanan`);
                                         setShowNotifications(false);
                                     }}
-                                    className={`px-4 py-3 border-b border-gray-50 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-750 ${!notif.isRead ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
+                                    className={`px-4 py-3.5 sm:py-3 border-b border-gray-50 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-750 active:bg-gray-100 dark:active:bg-gray-700 ${!notif.isRead ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
                                 >
                                     <div className="flex items-start gap-3">
                                         {notif.type === "ORDER_REVIEW_REQUEST" ? (
@@ -94,10 +126,10 @@ export default function HeaderNotifications({
                                             />
                                         )}
                                         <div className="flex-1 min-w-0 space-y-0.5">
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white break-words">
                                                 {notif.title}
                                             </h4>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed break-words">
                                                 {notif.message}
                                             </p>
                                             <p className="text-[11px] text-gray-400 dark:text-gray-500 pt-0.5">
