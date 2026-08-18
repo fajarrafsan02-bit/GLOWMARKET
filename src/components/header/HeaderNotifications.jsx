@@ -20,7 +20,7 @@ export default function HeaderNotifications({
     }
 
     return (
-        <div className="hidden xs:block relative" ref={notificationRef}>
+        <div className="relative" ref={notificationRef}>
             <button
                 onClick={() => {
                     setShowNotifications(!showNotifications);
@@ -38,9 +38,11 @@ export default function HeaderNotifications({
                 )}
             </button>
 
-            {/* Dropdown */}
+            {/* Dropdown. Lebarnya dibatasi lebar layar dikurangi padding header
+                supaya panel tidak meluber ke luar tepi di ponsel sempit —
+                loncengnya bukan elemen paling kanan di deretan tombol. */}
             {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-[70vh] overflow-hidden flex flex-col">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-80 sm:max-w-96 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-[70vh] overflow-hidden flex flex-col">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
