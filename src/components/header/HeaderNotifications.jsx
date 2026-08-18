@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Bell, CheckCheck, Star, X } from "lucide-react";
 
 export default function HeaderNotifications({
@@ -19,6 +20,96 @@ export default function HeaderNotifications({
         return null;
     }
 
+    /* Isi panel dipakai dua kali: sebagai sheet di ponsel (lewat portal) dan
+       sebagai dropdown biasa mulai sm, jadi dipisah agar tidak terduplikasi. */
+    const isiPanel = (
+        <>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Notifikasi</h3>
+
+                <div className="flex items-center gap-1">
+                    {notificationCount > 0 && (
+                        <button
+                            onClick={markAllNotificationsAsRead}
+                            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                            <CheckCheck className="w-3.5 h-3.5 shrink-0" />
+                            <span className="whitespace-nowrap">Tandai dibaca</span>
+                        </button>
+                    )}
+
+                    <button
+                        type="button"
+                        onClick={() => setShowNotifications(false)}
+                        className="sm:hidden w-8 h-8 -mr-1.5 shrink-0 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        aria-label="Tutup notifikasi"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+
+            {/* Daftar. Padding bawah menyisakan ruang bagi bilah gestur ponsel
+                agar entri terakhir tetap bisa disentuh. */}
+            <div className="overflow-y-auto overscroll-contain flex-1 pb-[env(safe-area-inset-bottom)]">
+                {notifications.length === 0 ? (
+                    <div className="p-8 text-center">
+                        <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
+                            <Bell className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                        </div>
+                        <p className="text-sm text-gray-400 dark:text-gray-500">
+                            Tidak ada notifikasi
+                        </p>
+                    </div>
+                ) : (
+                    notifications.map((notif) => (
+                        <div
+                            key={notif.id}
+                            onClick={() => {
+                                if (!notif.isRead) markNotificationAsRead(notif.id);
+                                if (notif.paymentId) navigate(`/pesanan`);
+                                setShowNotifications(false);
+                            }}
+                            className={`px-4 py-3.5 sm:py-3 border-b border-gray-50 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-750 active:bg-gray-100 dark:active:bg-gray-700 ${!notif.isRead ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
+                        >
+                            <div className="flex items-start gap-2.5 sm:gap-3">
+                                {notif.type === "ORDER_REVIEW_REQUEST" ? (
+                                    <span
+                                        className={`mt-0.5 w-7 h-7 shrink-0 rounded-full flex items-center justify-center ${!notif.isRead ? "bg-amber-100 dark:bg-amber-900/30 text-amber-500" : "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500"}`}
+                                    >
+                                        <Star className="w-3.5 h-3.5 fill-current" />
+                                    </span>
+                                ) : (
+                                    <span
+                                        className={`mt-2 w-2 h-2 rounded-full shrink-0 ${!notif.isRead ? "bg-amber-500" : "bg-gray-200 dark:bg-gray-600"}`}
+                                    />
+                                )}
+                                <div className="flex-1 min-w-0 space-y-0.5">
+                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white break-words">
+                                        {notif.title}
+                                    </h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed break-words">
+                                        {notif.message}
+                                    </p>
+                                    <p className="text-[11px] text-gray-400 dark:text-gray-500 pt-0.5">
+                                        {new Date(notif.timestamp).toLocaleString("id-ID", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+        </>
+    );
+
     return (
         <div className="relative" ref={notificationRef}>
             <button
@@ -38,115 +129,47 @@ export default function HeaderNotifications({
                 )}
             </button>
 
-            {/* Latar gelap khusus ponsel: menandai panel sebagai lapisan
-                terpisah sekaligus memberi sasaran tutup di luar sheet. */}
-            {showNotifications && (
-                <div
-                    onClick={() => setShowNotifications(false)}
-                    className="sm:hidden fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60]"
-                    aria-hidden="true"
-                />
-            )}
+            {/* Sheet ponsel ditempatkan lewat portal ke body. Header memakai
+                backdrop-blur, dan properti itu menjadikannya containing block
+                bagi turunan position:fixed — tanpa portal, sheet akan berlabuh
+                ke bilah header setinggi ~56px dan menempel di atas layar. */}
+            {showNotifications &&
+                createPortal(
+                    <div
+                        data-notif-sheet="true"
+                        className="sm:hidden fixed inset-0 z-[100] flex flex-col justify-end"
+                    >
+                        <div
+                            onClick={() => setShowNotifications(false)}
+                            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+                            aria-hidden="true"
+                        />
 
-            {/* Di ponsel tampil sebagai bottom sheet selebar layar — panel
-                selebar 320px yang berlabuh pada lonceng terlalu sempit dan
-                jauh dari jangkauan ibu jari. Mulai sm kembali jadi dropdown. */}
+                        <div
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Notifikasi"
+                            className="relative w-full max-h-[80vh] rounded-t-2xl border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl overflow-hidden flex flex-col"
+                        >
+                            {/* Gagang geser: penanda lazim panel bisa ditutup. */}
+                            <div className="pt-2.5 pb-1 flex justify-center shrink-0">
+                                <span className="w-9 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                            </div>
+
+                            {isiPanel}
+                        </div>
+                    </div>,
+                    document.body,
+                )}
+
+            {/* Mulai sm tetap dropdown yang berlabuh pada lonceng. */}
             {showNotifications && (
                 <div
                     role="dialog"
                     aria-label="Notifikasi"
-                    className="fixed inset-x-0 bottom-0 z-[60] w-full max-h-[80vh] rounded-t-2xl border-t sm:absolute sm:inset-auto sm:right-0 sm:bottom-auto sm:z-50 sm:mt-2 sm:w-96 sm:max-h-[70vh] sm:rounded-xl sm:border bg-white dark:bg-gray-800 shadow-xl border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
+                    className="hidden sm:flex absolute right-0 mt-2 w-96 max-h-[70vh] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl z-50 overflow-hidden flex-col"
                 >
-                    {/* Gagang geser: penanda lazim bahwa panel bisa ditutup. */}
-                    <div className="sm:hidden pt-2.5 pb-1 flex justify-center shrink-0">
-                        <span className="w-9 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-                    </div>
-
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 shrink-0">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                            Notifikasi
-                        </h3>
-
-                        <div className="flex items-center gap-1">
-                            {notificationCount > 0 && (
-                                <button
-                                    onClick={markAllNotificationsAsRead}
-                                    className="flex items-center gap-1.5 px-2 py-1.5 -mr-0.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                                >
-                                    <CheckCheck className="w-3.5 h-3.5" />
-                                    Tandai dibaca
-                                </button>
-                            )}
-
-                            <button
-                                type="button"
-                                onClick={() => setShowNotifications(false)}
-                                className="sm:hidden w-8 h-8 -mr-1.5 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                aria-label="Tutup notifikasi"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Daftar. Padding bawah menyisakan ruang bagi bilah
-                        gestur ponsel agar entri terakhir tetap bisa disentuh. */}
-                    <div className="overflow-y-auto overscroll-contain flex-1 pb-[env(safe-area-inset-bottom)]">
-                        {notifications.length === 0 ? (
-                            <div className="p-8 text-center">
-                                <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
-                                    <Bell className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                </div>
-                                <p className="text-sm text-gray-400 dark:text-gray-500">
-                                    Tidak ada notifikasi
-                                </p>
-                            </div>
-                        ) : (
-                            notifications.map((notif) => (
-                                <div
-                                    key={notif.id}
-                                    onClick={() => {
-                                        if (!notif.isRead) markNotificationAsRead(notif.id);
-                                        if (notif.paymentId) navigate(`/pesanan`);
-                                        setShowNotifications(false);
-                                    }}
-                                    className={`px-4 py-3.5 sm:py-3 border-b border-gray-50 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-750 active:bg-gray-100 dark:active:bg-gray-700 ${!notif.isRead ? "bg-amber-50/50 dark:bg-amber-900/10" : ""}`}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        {notif.type === "ORDER_REVIEW_REQUEST" ? (
-                                            <span
-                                                className={`mt-0.5 w-7 h-7 shrink-0 rounded-full flex items-center justify-center ${!notif.isRead ? "bg-amber-100 dark:bg-amber-900/30 text-amber-500" : "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500"}`}
-                                            >
-                                                <Star className="w-3.5 h-3.5 fill-current" />
-                                            </span>
-                                        ) : (
-                                            <span
-                                                className={`mt-2 w-2 h-2 rounded-full shrink-0 ${!notif.isRead ? "bg-amber-500" : "bg-gray-200 dark:bg-gray-600"}`}
-                                            />
-                                        )}
-                                        <div className="flex-1 min-w-0 space-y-0.5">
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white break-words">
-                                                {notif.title}
-                                            </h4>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed break-words">
-                                                {notif.message}
-                                            </p>
-                                            <p className="text-[11px] text-gray-400 dark:text-gray-500 pt-0.5">
-                                                {new Date(notif.timestamp).toLocaleString("id-ID", {
-                                                    day: "2-digit",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                    {isiPanel}
                 </div>
             )}
         </div>

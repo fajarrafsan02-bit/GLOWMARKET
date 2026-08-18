@@ -261,9 +261,18 @@ export default function useHeaderData(isLoggedIn, userId) {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-                setShowNotifications(false);
+            if (!notificationRef.current || notificationRef.current.contains(event.target)) {
+                return;
             }
+
+            /* Sheet ponsel dirender lewat portal ke body sehingga berada di
+               luar notificationRef. Penutupannya diurus latar sheet sendiri,
+               jadi klik di dalamnya jangan diperlakukan sebagai klik luar. */
+            if (event.target.closest('[data-notif-sheet="true"]')) {
+                return;
+            }
+
+            setShowNotifications(false);
         };
 
         if (showNotifications) {
